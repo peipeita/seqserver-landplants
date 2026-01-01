@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
-# Install SequenceServer
-RUN gem install sequenceserver
+# Install SequenceServer v3.1.2 (tree widget works in this version)
+RUN gem install sequenceserver -v 3.1.2
 
 # Create directories
 RUN mkdir -p /app/blast_dbs /app/config /app/scripts
