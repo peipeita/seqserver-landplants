@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  sequenceserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+    platform: linux/amd64
+    container_name: sequenceserver-landplants
+    ports:
+      - "4567:4567"
+    volumes:
+      # Mount the FASTA files directory (read-only)
+      - /Users/user/landplants-fastas/clean/pep:/data/fasta:ro
+      # Mount BLAST databases directory (read-write)
+      - ./blast_dbs:/app/blast_dbs
+      # Mount config
+      - ./config/sequenceserver.conf:/app/config/sequenceserver.conf:ro
+    environment:
+      - SEQUENCESERVER_CONFIG=/app/config/sequenceserver.conf
+    restart: unless-stopped
+    command: sequenceserver -c /app/config/sequenceserver.conf -H 0.0.0.0 -p 4567

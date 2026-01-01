@@ -1,0 +1,13 @@
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# BLAST databases (too large for GitHub)
+blast_dbs/
+
+# Environment files
+.env
+.env.local
