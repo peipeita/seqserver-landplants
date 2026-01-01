@@ -101,6 +101,53 @@ docker-compose up -d
 
 **Note:** The setup script automatically detects taxonomic groups from filename prefixes and organizes databases accordingly. Make sure your FASTA files follow the naming convention: `<group>-<species>.pep.fa`
 
+### Adding New Protein Files
+
+To add new protein FASTA files to your SequenceServer database:
+
+#### 1. Add Your FASTA Files
+Place your new protein FASTA files in the source directory:
+```
+/Users/user/landplants-fastas/clean/pep/
+```
+
+The script will automatically detect files with these extensions: `.fasta`, `.fa`, `.faa`, `.pep`
+
+#### 2. Name Files with Taxonomic Prefixes
+For automatic organization into taxonomic groups, use these naming conventions:
+
+- `algae-yourspecies.pep.fa` → Algae folder
+- `basal_angiosperm-yourspecies.pep.fa` → Basal_Angiosperm folder
+- `eudicots-yourspecies.pep.fa` → Eudicots folder
+- `fern-yourspecies.pep.fa` or `fr-yourspecies.pep.fa` → Fern folder
+- `gymnosperm-yourspecies.pep.fa` → Gymnosperm folder
+- `hornwort-yourspecies.pep.fa` → Hornwort folder
+- `liverwort-yourspecies.pep.fa` → Liverwort folder
+- `lycophyte-yourspecies.pep.fa` → Lycophyte folder
+- `monocots-yourspecies.pep.fa` → Monocots folder
+- `mosses-yourspecies.pep.fa` → Mosses folder
+
+**Note:** Files without these prefixes will still be processed and added to the database, but won't be organized into a specific taxonomic folder.
+
+#### 3. Rebuild BLAST Databases
+After adding new files, rebuild the databases:
+
+```bash
+# Stop the service
+docker-compose down
+
+# Run the setup script (processes all FASTA files including new ones)
+docker-compose run --rm sequenceserver python3 /app/scripts/setup_databases.py
+
+# Restart the service
+docker-compose up -d
+```
+
+The setup script will show you a summary of all databases organized by taxonomic group.
+
+#### 4. Adding New Taxonomic Groups
+If you need a taxonomic category not listed above, you can modify the `TAXONOMIC_DIRS` dictionary in `scripts/setup_databases.py` to add custom prefixes and folder names.
+
 ## Features
 
 ### Tree Widget for Database Organization
