@@ -22,3 +22,19 @@ services:
       - SEQUENCESERVER_CONFIG=/app/config/sequenceserver.conf
     restart: unless-stopped
     command: sequenceserver -c /app/config/sequenceserver.conf -H 0.0.0.0 -p 4567
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4567"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.5.0
+    container_name: cloudflared-tunnel
+    restart: unless-stopped
+    environment:
+      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+    depends_on:
+      sequenceserver:
+        condition: service_healthy

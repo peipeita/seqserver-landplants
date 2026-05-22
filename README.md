@@ -264,6 +264,64 @@ docker-compose down
 rm -rf blast_dbs/*
 ```
 
+## Sharing with Collaborators
+
+This setup uses Cloudflare Tunnel and Cloudflare Access to securely share SequenceServer with collaborators without exposing it to the public internet.
+
+### One-Time Cloudflare Dashboard Setup
+
+1. **Create a tunnel:**
+   - Go to [Zero Trust Dashboard](https://one.dash.cloudflare.com/) → Networks → Tunnels
+   - Click "Create a tunnel" → select "Cloudflared" → name it (e.g., `sequenceserver-landplants`)
+   - Copy the tunnel token and save it to your `.env` file as `TUNNEL_TOKEN=<token>`
+
+2. **Add a public hostname:**
+   - In the tunnel configuration, go to "Public Hostname" → "Add a public hostname"
+   - Set your subdomain (e.g., `blast.yourdomain.com`)
+   - Service type: `HTTP`
+   - URL: `sequenceserver:4567`
+
+3. **Create an Access application:**
+   - Go to Access → Applications → "Add an application" → "Self-hosted"
+   - Name it (e.g., "SequenceServer")
+   - Set the application domain to match your public hostname (e.g., `blast.yourdomain.com`)
+
+4. **Create an Access policy:**
+   - Add a policy to control who can access the application
+   - **Option A — Email list:** Add each collaborator's email address individually. Best for a small, fixed group (~20 people).
+   - **Option B — Email domain:** Allow `*@yourinstitution.edu`. Simpler if all collaborators share a domain, but allows anyone with that domain.
+
+### Start/Stop the Tunnel
+
+The tunnel starts and stops with the rest of the stack:
+
+```bash
+# Start SequenceServer and tunnel
+docker-compose up -d
+
+# Stop both
+docker-compose down
+```
+
+### Add or Remove Collaborators
+
+Edit the Access policy in the Cloudflare Zero Trust dashboard. No redeployment is required — changes take effect immediately.
+
+### Rotate the Tunnel Token
+
+1. Go to Zero Trust → Networks → Tunnels → select your tunnel → Configure
+2. Click "Regenerate token" (the tunnel, public hostname, and Access policy remain intact)
+3. Copy the new token to your `.env` file
+4. Restart the stack: `docker-compose up -d`
+
+### Local Access
+
+Port 4567 remains published to localhost for your own use (`http://localhost:4567`). If you want the service reachable *only* via the tunnel, remove the `ports:` section from the `sequenceserver` service in `docker-compose.yml`.
+
+### Portability Note
+
+This tunnel configuration works identically on macOS and Linux. The `cloudflared` service connects to `sequenceserver:4567` using Docker's internal networking, which works on both platforms.
+
 ## License
 
 Please refer to SequenceServer's license at https://sequenceserver.com/
